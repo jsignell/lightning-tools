@@ -1,3 +1,8 @@
+import os
+import numpy as np
+import pandas as pd
+import xarray as xr
+
 out = '/home/jsignell/erddapData/Cloud_to_Ground_Lightning/'
 out_path = out+'US/'
 
