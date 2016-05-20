@@ -1,4 +1,5 @@
 from __init__ import *
+from plotting import *
 
 class Region:
     '''    
@@ -81,7 +82,7 @@ class Region:
     def to_density(self, ds):
         nyears = ds.time.groupby('time.year').count().shape[0]
         self.FD_grid = self.FC_grid/float(nyears)
-        
+    
     def __to_grid(self, group=None, **kwargs):        
         if hasattr(group, '__iter__'):
             grid, _, _ = np.histogram2d(self.x[group], self.y[group], bins=[self.gridx, self.gridy], **kwargs)
@@ -109,36 +110,89 @@ class Region:
             d.update({k: self.__to_grid(v)})
         self.DC_grid = d
     
-    def to_ncfile(self, t, check_existence=True):
+    def to_ncfile(self, t, check_existence=True, full_path=True):
         t = pd.Timestamp(t)
         fname = str(t.date()).replace('-','_')+'.nc'
         if check_existence:
-            if os.path.isfile(self.PATH+fname):
-                return fname
-            else:
+            if not os.path.isfile(self.PATH+fname):
                 return
+        if full_path:
+            return self.PATH+fname
         return fname
     
     def get_daily_ds(self, t, base=12, func='grid'):
-        if pd.Timestamp(t).hour != base:
-            t = pd.Timestamp(str(t)[0:10]+' {base}:00'.format(base=base))
+        '''
+        Get the dataset for the region and day using the base hour
+        (assumes function is available locally). 
+        If you are interested in 0to0 days it is equivalent to using:
+        xr.open_dataset(to_ncfile(t))
+        
+        Parameters
+        ----------
+        t: str or pd.Timestamp indicating date
+        base: int indicating hours between which to take day - 12
+        func: functions to run on the dataset - 'grid'
+        
+        Returns
+        -------
+        ds: concatenated xr.Dataset for the region and day
+        '''
+        t = fix_t(t, base)
+        if base == 0:
+            ds0 = xr.open_dataset(to_ncfile(t))
         else:
-            t = pd.Timestamp(t)
-            
-        f0 = self.to_ncfile(t)
-        f1 = self.to_ncfile(t+pd.DateOffset(1))
-        
-        ds = xr.concat([xr.open_dataset(self.PATH+f) for f in [f0, f1]], dim='record')
-        UTC12 = [np.datetime64(t) for t in pd.date_range(start=t, periods=2)]
-        
-        ds0 = ds.where((ds.time>UTC12[0]) & (ds.time<UTC12[1])).dropna('record')
-        ds.close()
+            f0 = self.to_ncfile(t)
+            f1 = self.to_ncfile(t+pd.DateOffset(1))
+
+            ds = xr.concat([xr.open_dataset(f) for f in [f0, f1]], dim='record')
+            UTC12 = [np.datetime64(t) for t in pd.date_range(start=t, periods=2)]
+
+            ds0 = ds.where((ds.time>UTC12[0]) & (ds.time<UTC12[1])).dropna('record')
+            ds.close()
         
         if func=='grid':
             self.set_x_y(ds0)
             self.FC_grid = self.__to_grid()
         return(ds0)
+    
+    def get_grid_slices(self, t, freq='5min', base=12, filter=True):
+        '''
+        For the pre-defined grid, use indicated frequency to also bin along the time dimension
+        
+        Parameter
+        --------
+        t: str or pd.Timestamp indicating date
+        freq: str indicating frequency as in pandas - '5min'
+        base: int indicating hours between which to take day - 12
+        filter: bool indicating whether or not to take only cloud to ground events
+                only valid for new type files
+        
+        Returns
+        -------
+        box: np.array of shape (ntimesteps, ny, nx)
+        tr: timerange of shape (ntimesteps)
+        
+        Benchmarking
+        ------------
+        4.26 s for 600x600 1min
+        1.16 s for 600x600 5min
+        608 ms for 60x60 5min
+        '''
+        ds = self.get_daily_ds(t, base=base, func=None)
+        ds.close()
+        df = ds.to_dataframe()
+        if filter:
+            df = df[df['cloud_ground']=='G']
+        df.index = df.time
+        t = fix_t(t, base)
+        tr = pd.date_range(t, t+pd.DateOffset(1), freq=freq)
+        d = []
+        for i in range(len(tr)-1):
+            grid, _,_ = np.histogram2d(df.lon[tr[i]:tr[i+1]].values, df.lat[tr[i]:tr[i+1]].values, bins=[self.gridx, self.gridy])
+            d.append(grid.T)
+        return(np.stack(d), tr)
 
+    
     def get_top(self, n=100, base=12):
         '''
         Quick and dirty method for finding top n FC days for a subsetted region. This method
@@ -191,3 +245,33 @@ class Region:
             d.update({pd.Timestamp(UTC12[1]): ds.where((ds.time>UTC12[1]) & (ds.time<UTC12[2])).dropna('record').dims.values()[0]})
             ds.close()
         return(d)   
+    
+    def plot_grid(self, grid, ax=None, cbar=False, 
+                  cmap=cmap, interpolation='None', **kwargs):
+        '''
+        Simple and fast plot generation for gridded data
+        
+        Parameters
+        ----------
+        grid: np.array with shape matching gridx by gridy
+        ax: matplotlib axes object, if not given generates and populates with basic map
+        cbar: bool indicating whether or not to show default colorbar
+        **kwargs: fed directly into ax.imshow()
+        
+        Returns
+        -------
+        im, ax: (output from ax.imshow, matplotlib axes object)
+        
+        Benchmarking
+        ------------
+        33.8 ms for 600x600
+        32.9 ms for 60x60
+        '''     
+        if ax is None:
+            ax = background(plt.axes(projection=ccrs.PlateCarree()))
+        im = ax.imshow(grid, cmap=cmap, interpolation=interpolation,
+                       extent=[self.gridx.min(), self.gridx.max(), self.gridy.min(), self.gridy.max()], 
+                       **kwargs)
+        if cbar:
+            plt.colorbar(im, ax=ax)
+        return im, ax

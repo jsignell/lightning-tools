@@ -4,6 +4,9 @@ import cartopy.feature as cfeature
 
 import matplotlib.pyplot as plt
 
+cmap = plt.get_cmap('gnuplot_r', 9)
+cmap.set_under('None')
+
 def background(ax):
     '''
     Add standard background features to geoAxes object
