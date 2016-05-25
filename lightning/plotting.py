@@ -15,8 +15,10 @@ def background(ax):
                                           name='admin_1_states_provinces_lines',
                                           scale='50m',
                                           facecolor='none')
-    ax.add_feature(states)
-    ax.add_feature(cfeature.BORDERS)
+    
+    ax.add_feature(cfeature.OCEAN)
     ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS)
+    ax.add_feature(states)
     return(ax)
 

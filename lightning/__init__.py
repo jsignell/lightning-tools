@@ -1,19 +1,9 @@
-import os
-import numpy as np
-import pandas as pd
-import xarray as xr
+from common import *
+from plotting import *
+from region import *
 
 out = '/home/jsignell/erddapData/Cloud_to_Ground_Lightning/'
 out_path = out+'US/'
-
-def to_decimal(degree, minute, second):
-    return(degree+(minute/60.)+(second/3600.))
-
-def fix_t(t, base):
-    t = pd.Timestamp(t)
-    if t.hour != base:
-        t += pd.DateOffset(hours=base)
-    return(t)
 
 months = {1: 'January', 2:'February', 3:'March', 4: 'April', 5:'May',6: 'June', 
           7:'July', 8:'August', 9:'September', 10:'October', 11:'November', 12:'December'}

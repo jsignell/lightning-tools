@@ -1,5 +1,9 @@
-from __init__ import *
+import os
+import numpy as np
+import pandas as pd
+import xarray as xr
 from plotting import *
+from common import *
 
 class Region:
     '''    
@@ -125,7 +129,7 @@ class Region:
         Get the dataset for the region and day using the base hour
         (assumes function is available locally). 
         If you are interested in 0to0 days it is equivalent to using:
-        xr.open_dataset(to_ncfile(t))
+        xr.open_dataset(self.to_ncfile(t))
         
         Parameters
         ----------
@@ -139,7 +143,7 @@ class Region:
         '''
         t = fix_t(t, base)
         if base == 0:
-            ds0 = xr.open_dataset(to_ncfile(t))
+            ds0 = xr.open_dataset(self.to_ncfile(t))
         else:
             f0 = self.to_ncfile(t)
             f1 = self.to_ncfile(t+pd.DateOffset(1))
@@ -155,17 +159,19 @@ class Region:
             self.FC_grid = self.__to_grid()
         return(ds0)
     
-    def get_grid_slices(self, t, freq='5min', base=12, filter=True):
+    def get_daily_grid_slices(self, t, base=12, **kwargs):
         '''
         For the pre-defined grid, use indicated frequency to also bin along the time dimension
         
         Parameter
         --------
         t: str or pd.Timestamp indicating date
-        freq: str indicating frequency as in pandas - '5min'
         base: int indicating hours between which to take day - 12
+        freq: str indicating frequency as in pandas - '5min'
         filter: bool indicating whether or not to take only cloud to ground events
-                only valid for new type files
+                For new style events uses 'C', 'G' flag, otherwise use strokes where 
+                amplitude > 10 or amplitude < 0 
+                (after: Cummins et al. 1998 and Orville et al. 2002)
         
         Returns
         -------
@@ -179,13 +185,45 @@ class Region:
         608 ms for 60x60 5min
         '''
         ds = self.get_daily_ds(t, base=base, func=None)
+        t = fix_t(t, base)
+        start = t
+        end = t+pd.DateOffset(1)
+        box, tr = self.get_grid_slices(ds, start, end, **kwargs)
         ds.close()
+        return(box, tr)
+        
+    def get_grid_slices(self, ds, start, end, freq='5min', filter=True):
+        '''
+        For the pre-defined grid, use indicated frequency to also bin along the time dimension
+        
+        Parameter
+        --------
+        ds: xr.dataset for a short amount of time (a couple days)
+        start: str or pd.Timestamp indicating start time for slices
+        end: str or pd.Timestamp indicating end time for slices
+        freq: str indicating frequency as in pandas - '5min'
+        filter: bool indicating whether or not to take only cloud to ground events
+                For new style events uses 'C', 'G' flag, otherwise use strokes where 
+                amplitude > 10 or amplitude < 0 
+                (after: Cummins et al. 1998 and Orville et al. 2002)
+        
+        Returns
+        -------
+        box: np.array of shape (ntimesteps, ny, nx)
+        tr: timerange of shape (ntimesteps)
+        '''
         df = ds.to_dataframe()
         if filter:
-            df = df[df['cloud_ground']=='G']
+            try: 
+                df = df[df['cloud_ground']=='G']
+            except:
+                if hasattr(filter, '__iter__'):
+                    df = df[(df['amplitude']<filter[0]) | (df['amplitude']>filter[1])]
+                else:
+                    df = df[(df['amplitude']<0) | (df['amplitude']>10)]
         df.index = df.time
-        t = fix_t(t, base)
-        tr = pd.date_range(t, t+pd.DateOffset(1), freq=freq)
+        
+        tr = pd.date_range(start, end, freq=freq)
         d = []
         for i in range(len(tr)-1):
             grid, _,_ = np.histogram2d(df.lon[tr[i]:tr[i+1]].values, df.lat[tr[i]:tr[i+1]].values, bins=[self.gridx, self.gridy])
