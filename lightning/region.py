@@ -313,3 +313,75 @@ class Region:
         if cbar:
             plt.colorbar(im, ax=ax)
         return im, ax
+    
+    def add_buffer(self, p):
+        from geopy.distance import vincenty
+
+        edges = zip([self.gridy[0]]*100, np.linspace(self.gridx[0], self.gridx[-1],100))
+        edges.extend(zip(self.linspace(self.gridy[0], self.gridy[-1],100), [self.gridx[-1]]*100))
+        edges.extend(zip([self.gridy[-1]]*100, np.linspace(self.gridx[0], self.gridx[-1],100)))
+        edges.extend(zip(np.linspace(self.gridy[0], self.gridy[-1],100), [self.gridx[0]]*100))
+
+        for it in range(p.shape[0]):
+            for ifeat in range(p.shape[1]):
+                if np.isnan(p[it, ifeat, 'centroidY']):
+                    continue
+                center = p[it, ifeat, ['centroidY', 'centroidX']].values
+                dist = min([vincenty(center, edge).kilometers for edge in edges])
+                r = (p[it, ifeat, ['area']].values/np.pi)**.5
+                if r>dist:
+                    df0 = p[it,:,:]
+                    for ichar in range(21):
+                        df0.set_value(p.major_axis[ifeat], p.minor_axis[ichar], np.nan)
+        return(p)
+
+    def get_features(self, box, thresh=.01, sigma=3, min_size=4, const=5, buffer=False):
+        '''
+        Use r package SpatialVx to identify features. 
+        
+        Parameters
+        ----------
+        box: grid slices as returned from self.get_grid_slice()
+        '''
+        from rpy2 import robjects 
+        from rpy2.robjects.packages import importr
+        from rpy2.robjects import pandas2ri
+        pandas2ri.activate()
+        SpatialVx = importr('SpatialVx')
+        rsummary = robjects.r.summary
+        r_tools = import_r_tools()
+
+        d = {}
+        X, Y = np.meshgrid(self.gridx[0:-1], self.gridy[0:-1])
+        ll = np.array([X.flatten('F'), Y.flatten('F')]).T
+        for i in range(box.shape[0]-1):
+            hold = SpatialVx.make_SpatialVx(box[i,:,:], box[i+1,:,:], loc=ll)
+            look = r_tools.FeatureFinder_gaussian(hold, nx=box.shape[2], ny=box.shape[1], 
+                                                  thresh=thresh, smoothpar=sigma, **(dotvars(min_size=min_size)))
+            try:
+                x = rsummary(look, silent=True)[0]
+            except:
+                continue
+            px = pandas2ri.ri2py(x)
+            df0 = pd.DataFrame(px, columns=['centroidX', 'centroidY', 'area', 'OrientationAngle', 
+                                          'AspectRatio', 'Intensity0.25', 'Intensity0.9'])
+            df0['Observed'] = list(df0.index+1)
+            m = SpatialVx.centmatch(look, criteria=3, const=const)
+            p = pandas2ri.ri2py(m[12])
+            df1 = pd.DataFrame(p, columns=['Forecast', 'Observed'])
+            l = SpatialVx.FeatureMatchAnalyzer(m)
+            try:
+                p = pandas2ri.ri2py(rsummary(l, silent=True))
+            except:
+                continue
+            df2 = pd.DataFrame(p, columns=['Partial Hausdorff Distance','Mean Error Distance','Mean Square Error Distance',
+                                          'Pratts Figure of Merit','Minimum Separation Distance', 'Centroid Distance',
+                                          'Angle Difference','Area Ratio','Intersection Area','Bearing', 'Baddeleys Delta Metric',
+                                          'Hausdorff Distance'])
+            df3 = df1.join(df2)
+
+            d.update({tr[i]: pd.merge(df0, df3, how='outer')})
+            p = pd.Panel(d)
+            if buffer:
+                return(self.add_buffer(p))
+            return(p)
