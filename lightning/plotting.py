@@ -16,7 +16,6 @@ def background(ax):
                                           name='admin_1_states_provinces_lines',
                                           scale='50m',
                                           facecolor='none')
-    
     ax.add_feature(cfeature.OCEAN)
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS)
@@ -55,5 +54,13 @@ def shaded_relief(ax, extents=[]):
     # interesting orography.
     if len(extents) == 4:
         ax.set_extent(extents)
-    return ax
+    return(ax)
+
+def urban(ax, c='red', **kwargs):
+    urban = cfeature.NaturalEarthFeature(category='cultural',
+                                          name='urban_areas',
+                                          scale='50m',
+                                          facecolor=c, edgecolor='None')
+    ax.add_feature(urban, **kwargs)
+    return(ax)
     
