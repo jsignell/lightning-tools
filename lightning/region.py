@@ -38,7 +38,7 @@ class Region:
         self.gridx = np.linspace(minx, maxx, nbins)
         self.gridy = np.linspace(miny, maxy, nbins)
     
-    def get_ds(self, cols=['strokes', 'amplitude'], func='grid', **kwargs):
+    def get_ds(self, cols=['strokes', 'amplitude'], func='grid', filter_CG=False, **kwargs):
         '''
         Get the dataset for the region and time (assumes function is available locally)
         
@@ -75,17 +75,31 @@ class Region:
         ds = xr.open_mfdataset(self.PATH+fname, concat_dim='record', preprocess=preprocess_func)    
         
         if func == 'grid':
-            self.set_x_y(ds)
+            self.set_x_y(ds, filter_CG)
             self.FC_grid = self.__to_grid()
         return(ds)
         
-    def set_x_y(self, ds):
+    def set_x_y(self, ds, filter_CG=False):
+        if filter_CG:
+            try:
+                self.x = ds.lon[ds.cloud_ground == 'G'].values
+                self.y = ds.lat[ds.cloud_ground == 'G'].values
+            except:
+                if hasattr(filter_CG, '__iter__'):
+                    self.x = ds.lon[(ds['amplitude']<filter_CG[0]) | (ds['amplitude']>filter_CG[1])].values
+                    self.y = ds.lat[(ds['amplitude']<filter_CG[0]) | (ds['amplitude']>filter_CG[1])].values
+                else:
+                    self.x = ds.lon[(ds['amplitude']<0) | (ds['amplitude']>10)].values
+                    self.y = ds.lat[(ds['amplitude']<0) | (ds['amplitude']>10)].values
         self.x = ds.lon.values
         self.y = ds.lat.values
     
     def to_density(self, ds):
         nyears = ds.time.groupby('time.year').count().shape[0]
-        self.FD_grid = self.FC_grid/float(nyears)
+        if hasattr(self, 'FC_grid'):
+            self.FD_grid = self.FC_grid/float(nyears)
+        if hasattr(self, 'DC_grid'):
+            self.DD_grid = self.DC_grid/float(nyears)
     
     def __to_grid(self, group=None, **kwargs):        
         if hasattr(group, '__iter__'):
@@ -124,7 +138,7 @@ class Region:
             return self.PATH+fname
         return fname
     
-    def get_daily_ds(self, t, base=12, func='grid'):
+    def get_daily_ds(self, t, base=12, func='grid', filter_CG=False):
         '''
         Get the dataset for the region and day using the base hour
         (assumes function is available locally). 
@@ -145,18 +159,25 @@ class Region:
         if base == 0:
             ds0 = xr.open_dataset(self.to_ncfile(t))
         else:
-            f0 = self.to_ncfile(t)
-            f1 = self.to_ncfile(t+pd.DateOffset(1))
-
-            ds = xr.concat([xr.open_dataset(f) for f in [f0, f1]], dim='record')
-            UTC12 = [np.datetime64(t) for t in pd.date_range(start=t, periods=2)]
+            L = filter(None, [self.to_ncfile(day) for day in [t, t+pd.DateOffset(1)]])
+            if len(L)==0:
+                if func=='count':
+                    return 0
+                return
+            ds = xr.concat([xr.open_dataset(f) for f in L], dim='record')
+            UTC12 = [np.datetime64(day) for day in pd.date_range(start=t, periods=2)]
 
             ds0 = ds.where((ds.time>UTC12[0]) & (ds.time<UTC12[1])).dropna('record')
             ds.close()
-        
+            
         if func=='grid':
-            self.set_x_y(ds0)
+            self.set_x_y(ds0, filter_CG)
             self.FC_grid = self.__to_grid()
+            
+        if func=='count':
+            count = ds0.dims.values()[0]
+            ds0.close()
+            return(count)
         return(ds0)
     
     def get_daily_grid_slices(self, t, base=12, **kwargs):
@@ -192,7 +213,7 @@ class Region:
         ds.close()
         return(box, tr)
         
-    def get_grid_slices(self, ds, start, end, freq='5min', filter=True):
+    def get_grid_slices(self, ds, start, end, freq='5min', filter_CG=False):
         '''
         For the pre-defined grid, use indicated frequency to also bin along the time dimension
         
@@ -202,7 +223,7 @@ class Region:
         start: str or pd.Timestamp indicating start time for slices
         end: str or pd.Timestamp indicating end time for slices
         freq: str indicating frequency as in pandas - '5min'
-        filter: bool indicating whether or not to take only cloud to ground events
+        filter_CG: bool indicating whether or not to take only cloud to ground events
                 For new style events uses 'C', 'G' flag, otherwise use strokes where 
                 amplitude > 10 or amplitude < 0 
                 (after: Cummins et al. 1998 and Orville et al. 2002)
@@ -213,12 +234,12 @@ class Region:
         tr: timerange of shape (ntimesteps)
         '''
         df = ds.to_dataframe()
-        if filter:
+        if filter_CG:
             try: 
                 df = df[df['cloud_ground']=='G']
             except:
-                if hasattr(filter, '__iter__'):
-                    df = df[(df['amplitude']<filter[0]) | (df['amplitude']>filter[1])]
+                if hasattr(filter_CG, '__iter__'):
+                    df = df[(df['amplitude']<filter_CG[0]) | (df['amplitude']>filter_CG[1])]
                 else:
                     df = df[(df['amplitude']<0) | (df['amplitude']>10)]
         df.index = df.time
@@ -229,7 +250,6 @@ class Region:
             grid, _,_ = np.histogram2d(df.lon[tr[i]:tr[i+1]].values, df.lat[tr[i]:tr[i+1]].values, bins=[self.gridx, self.gridy])
             d.append(grid.T)
         return(np.stack(d), tr)
-
     
     def get_top(self, n=100, base=12):
         '''
@@ -251,39 +271,12 @@ class Region:
             print('This method only works for pre-subsetted regions.')
             return
         d={}
-        fnames = [str(t.date()).replace('-','_')+'.nc' for t in pd.date_range('1991-01-01', '2010-01-01')]
-        d = self.__get_top(fnames, d, n*2, base)
-        fnames = [str(t.date()).replace('-','_')+'.nc' for t in pd.date_range('2010-01-01', '2015-10-02')]
-        d = self.__get_top(fnames, d, n*2, base)
-        s = pd.Series(d).sort_values(ascending=False).head(n) 
+        for start, end in [('1991-01-01', '2010-01-01'), ('2010-01-01', '2015-10-02')]:
+            fnames = [self.to_ncfile(t, check_existence=False) for t in pd.date_range(start, end)]
+            d = get_top(fnames, d, n*2, base)
+            s = pd.Series(d).sort_values(ascending=False).head(n) 
         return s
-
-    def __get_fsizes(self, fnames):
-        fsizes = []
-        for i in range(len(fnames)):
-            try:
-                fsizes.append(os.stat(self.PATH+fnames[i]).st_size)
-            except:
-                fsizes.append(0)
-        s = pd.Series(fsizes, index=fnames)
-        s = s.sort_values(ascending=False)
-        return s
-
-    def __get_top(self, fnames, d, n, base):
-        s = self.__get_fsizes(fnames)
-        for i in range(n):
-            t = pd.Timestamp(s.index[i].strip('.nc').replace('_','-')+' {base}:00'.format(base=base))
-            ifname = fnames.index(s.index[i])
-            little_fnames = [self.PATH+f for f in fnames[ifname-1:ifname+2] if os.path.isfile(self.PATH+f)]
-
-            ds = xr.concat([xr.open_dataset(f) for f in little_fnames], dim='record')
-            UTC12 = [np.datetime64(t) for t in pd.date_range(start=t-pd.DateOffset(1), periods=3)]
-
-            d.update({pd.Timestamp(UTC12[0]): ds.where((ds.time>UTC12[0]) & (ds.time<UTC12[1])).dropna('record').dims.values()[0]})
-            d.update({pd.Timestamp(UTC12[1]): ds.where((ds.time>UTC12[1]) & (ds.time<UTC12[2])).dropna('record').dims.values()[0]})
-            ds.close()
-        return(d)   
-    
+          
     def plot_grid(self, grid, ax=None, cbar=False, 
                   cmap=cmap, interpolation='None', **kwargs):
         '''
