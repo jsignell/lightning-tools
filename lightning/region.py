@@ -272,9 +272,21 @@ class Region:
             return
         d={}
         for start, end in [('1991-01-01', '2010-01-01'), ('2010-01-01', '2015-10-02')]:
-            fnames = [self.to_ncfile(t, check_existence=False) for t in pd.date_range(start, end)]
-            d = get_top(fnames, d, n*2, base)
-            s = pd.Series(d).sort_values(ascending=False).head(n) 
+            tr = pd.date_range(fix_t(start, base), fix_t(end, base))
+            fnames = [self.to_ncfile(t, check_existence=False) for t in tr]
+            s = get_fsizes(fnames, tr)
+            for i in range(n):
+                little_tr = pd.date_range(start=s.index[i]-pd.DateOffset(1), periods=3)
+                little_fnames = [self.to_ncfile(t) for t in little_tr]
+                ds = xr.concat([xr.open_dataset(f) for f in little_fnames], dim='record')
+                UTC12 = [np.datetime64(t) for t in little_tr]
+
+                d.update({pd.Timestamp(UTC12[0]): ds.where((ds.time>UTC12[0]) &
+                                                           (ds.time<UTC12[1])).dropna('record').dims.values()[0]})
+                d.update({pd.Timestamp(UTC12[1]): ds.where((ds.time>UTC12[1]) &
+                                                           (ds.time<UTC12[2])).dropna('record').dims.values()[0]})
+                ds.close()
+        s = pd.Series(d).sort_values(ascending=False).head(n) 
         return s
           
     def plot_grid(self, grid, ax=None, cbar=False, 
