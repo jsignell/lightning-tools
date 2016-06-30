@@ -74,3 +74,27 @@ def windrose(df, dirn='Dirn(DegT)', speed='Speed(km/hr)', ax=None, N=16, bottom=
         bars = ax.bar(theta, radii, width=width, bottom=radii0, facecolor=c, alpha=0.8)
         #print smin, smax, c, radii
         radii0+= radii
+
+def windrose_cbar(fig=None):
+    '''
+    If you have a figsize in mind, then pass a figure object to this function
+    and the colorbar will be drawn to suit
+    '''
+    if fig is None:
+        fig = plt.figure(figsize=(16,1))
+    y = fig.get_figwidth()
+    import matplotlib.patches as mpatch
+    srange = zip([0,5,10,20,50], [5,10,20,50,100], ['#0000dd','green','#dddd00','#FF7800','#dd0000']) 
+    n=1
+    for smin, smax, c in srange:
+        ax = plt.subplot(1,5,n)
+        patch = mpatch.FancyBboxPatch([0,0], 1, 1, boxstyle='square', facecolor=c)
+        ax.add_patch(patch)
+        plt.axis('off')
+        if y>=12:
+            ax.text(.1, .4, '{smin} - {smax} km/hr'.format(smin=smin, smax=smax),
+                    fontsize=min(18, y+2), fontdict = {'color': 'white'})
+        else:
+            ax.text(.1, .4, '{smin} - {smax}\nkm/hr'.format(smin=smin, smax=smax),
+                    fontsize=min(14, y+5), fontdict = {'color': 'white'})
+        n+=1
