@@ -19,25 +19,25 @@ def read_TITAN(fname):
         df = pd.read_csv(fname, skiprows=9, delim_whitespace=True, header=None, names=header)
     return(df)
 
-def feature_locations(df, ax=None, lat='ReflCentroidLat(deg)', lon='ReflCentroidLon(deg)',
-                    paths=False, features=True, zoom=7, zorder=5, colorby='ComplexNum', c='k'):
-    if ax is None:
-        from cartopy.io.img_tiles import StamenTerrain
-        plt.figure(figsize=(14, 8))
-        ax = plt.axes(projection=ccrs.PlateCarree())
-        background(ax)
-        ax.add_image(StamenTerrain(), zoom)
-    if features:
-        storm_names = dict([(n[1], n[0]) for n in enumerate(df[colorby].unique())])
-        df.plot.scatter(x=lon, y=lat, 
-                        c=[storm_names[n] for n in df[colorby]],
-                        ax=ax, cmap='rainbow',
-                        edgecolor='None', s=50, zorder=zorder)
-    if paths:
-        gb = df.groupby(df['ComplexNum'])
-        for k,v in gb.groups.items():
-            gb.get_group(k).plot(x=lon, y=lat, c=c, ax=ax, legend=None, zorder=zorder+1)
-    return(ax)
+# def feature_locations(df, ax=None, lat='ReflCentroidLat(deg)', lon='ReflCentroidLon(deg)',
+#                     paths=False, features=True, zoom=7, zorder=5, colorby='ComplexNum', c='k'):
+#     if ax is None:
+#         from cartopy.io.img_tiles import StamenTerrain
+#         plt.figure(figsize=(14, 8))
+#         ax = plt.axes(projection=ccrs.PlateCarree())
+#         background(ax)
+#         ax.add_image(StamenTerrain(), zoom)
+#     if features:
+#         storm_names = dict([(n[1], n[0]) for n in enumerate(df[colorby].unique())])
+#         df.plot.scatter(x=lon, y=lat, 
+#                         c=[storm_names[n] for n in df[colorby]],
+#                         ax=ax, cmap='rainbow',
+#                         edgecolor='None', s=50, zorder=zorder)
+#     if paths:
+#         gb = df.groupby(df['ComplexNum'])
+#         for k,v in gb.groups.items():
+#             gb.get_group(k).plot(x=lon, y=lat, c=c, ax=ax, legend=None, zorder=zorder+1)
+#     return(ax)
 
 def bearing_plot(df, ax=None, N=16, bottom=0):
     '''
