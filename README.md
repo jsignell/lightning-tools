@@ -31,7 +31,7 @@ To look at particular storms, we can get daily characteristics: [Daily](https://
 
 ![Daily](https://github.com/jsignell/lightning-tools/blob/master/output/DailyMaxLoc.png "Daily Max")
 
-Or we can use an object based method to track features using the r package SpatialVx: [Tracking](http://nbviewer.jupyter.org/github/jsignell/lightning-tools/blob/master/Spatial%20Tracking-SpatialVx.ipynb)
+Or we can use an object based method to track features using the r package SpatialVx: [Tracking](http://nbviewer.jupyter.org/github/jsignell/lightning-tools/blob/master/Storm%20Tracking-SpatialVx.ipynb)
 
 ![Tracks](https://github.com/jsignell/lightning-tools/blob/master/output/Tracking.png)
 
