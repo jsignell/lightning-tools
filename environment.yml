@@ -1,0 +1,16 @@
+name: point-process
+channels:
+- conda-forge
+- defaults
+dependencies:
+- pandas
+- numpy
+- jupyter
+- matplotlib
+- cartopy
+- seaborn
+- xarray
+- pytables
+- pip:
+  - python-dotenv
+  - git+git://github.com/jsignell/point-process.git
