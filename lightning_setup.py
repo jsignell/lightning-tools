@@ -5,7 +5,7 @@ Setup the variable space for lightning data
 from pointprocess.common import to_decimal
 import matplotlib.cm as cm
 
-out = '/home/jsignell/erddapData/Cloud_to_Ground_Lightning/'
+out = '/data/NLDN/NetCDF/'
 out_path = out+'US/'
 
 cmap = cm.get_cmap('gnuplot_r', 9)
