@@ -6,6 +6,7 @@ from pointprocess.common import to_decimal
 import matplotlib.cm as cm
 
 out = '/home/jsignell/erddapData/Cloud_to_Ground_Lightning/'
+#out = 'http://hydromet-thredds.princeton.edu:9000/thredds/dodsC/data/Cloud_to_Ground_Lightning/'
 out_path = out+'US/'
 
 cmap = cm.get_cmap('gnuplot_r', 9)
@@ -34,6 +35,18 @@ cities={'cedar': {'path': out+'Cedar_City_UT/',
                   'lat': to_decimal(39, 47, 12),
                   'lon': -to_decimal(104, 32, 45),
                   'r': 3},
+        'kansas': {'path': out+'KansasCity_MO/',
+                   'lat': 38.805,
+                   'lon': -94.259,
+                   'r': 3},
+        'stlouis': {'path': out+'StLouis_MO/',
+                    'lat': 38.694,
+                    'lon': -90.678,
+                    'r': 3},
+        'philly': {'path': out+'MtHolly_NJ/',
+                   'lat': 39.942,
+                   'lon': -74.406,
+                   'r': 3},
         'columbia': {'path': out+'Columbia_Plateau/',
                      'lat': 45,
                      'lon': -119,
