@@ -1,4 +1,4 @@
-name: point-process
+name: lightning
 channels:
 - conda-forge
 - defaults
@@ -11,6 +11,8 @@ dependencies:
 - seaborn
 - xarray
 - pytables
+- geopy
 - pip:
+  - windrose
   - python-dotenv
   - git+git://github.com/jsignell/point-process.git
