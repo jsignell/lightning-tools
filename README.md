@@ -5,7 +5,7 @@ Examples of how to use [pointprocess module](https://github.com/jsignell/point-p
  We reformatted the data into NetCDF files. For an example of how to access the data from this format, and make a simple map:
 [read data](https://github.com/jsignell/lightning-tools/blob/master/00%20Read%20Data.ipynb)
 
-![Climatology](https://github.com/jsignell/lightning-tools/blob/master/output/US_1993.png "US 1993 Flash Count")
+![Climatology](output/US_1993.png?raw=true "US 1993 Flash Count")
 
 For our purposes, we have chosen several research sites and pulled the data out for these sites. An example of how to look at regions which aren't pre-subsetted, is provided here: [subset data](https://github.com/jsignell/lightning-tools/blob/master/01%20Un-subsetted.ipynb)
 
