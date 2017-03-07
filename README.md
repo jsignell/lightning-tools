@@ -42,7 +42,7 @@ Once the data are in NetCDF, it is straightforward to read the data using the xa
 For our purposes, we have chosen several research sites and pulled the data out for these sites. However, we have also provided methods for subsetting different geographic regions as in this case looking at Cape Cod:
 <a href=https://github.com/jsignell/lightning-tools/blob/master/01%20Un-subsetted.ipynb>
   <p align="center">
-    <img src=output/CapeCod.png?raw=true title="Cape Cod" />
+    <img src=output/CapeCod.png?raw=true title="Cape Cod" width=60%/>
   </p>
 </a>
 
@@ -53,7 +53,7 @@ For our purposes, we have chosen several research sites and pulled the data out 
 One of the most fundamental climatological analyses of lightning is the flash density - the number of lightning strikes per unit area per unit time.
 <a href=https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#flash-density>
   <p align="center">
-    <img src=output/AnnualMeanFD.png?raw=true title="Flash Density" />
+    <img src=output/AnnualMeanFD.png?raw=true title="Flash Density" width=60%/>
   </p>  
 </a>
 
@@ -62,14 +62,14 @@ Another interesting aspect of lightning is the time of day at which it occurs.
 We can explore the seasonal dependence in the diurnal cycle of lightning using a plot with polar coordinates where the top represents midnight and the bottom represents noon. Months are indicated by color.
 <a href=https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#diurnal-cycle>
   <p align="center">
-    <img src=output/DiurnalCycle.png?raw=true title="Diurnal Cycle" />
+    <img src=output/DiurnalCycle.png?raw=true title="Diurnal Cycle" width=60%/>
   </p>
 </a>
 
 To examine diurnal patterns in space, we map the hour of peak flash count. This shows the topographic dependence of the timing of lightning.
 <a href=https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#peak-time>
   <p align="center">
-    <img src=output/JAPeakHour.png?raw=true title="Hour of Peak" />
+    <img src=output/JAPeakHour.png?raw=true title="Hour of Peak" width=60%/>
   </p>
 </a>
 
@@ -77,7 +77,7 @@ To examine diurnal patterns in space, we map the hour of peak flash count. This 
 When looking at storms it can be interesting to explore how one strike is related to another. As a first pass, we mapped the locations of strikes in July and August of one year and colored them by the number of strikes that would occur in the proceeding hour.
 <a href=https://github.com/jsignell/lightning-tools/blob/master/03%20Initiation.ipynb>
   <p align="center">
-    <img src=output/JAInitiationLocations.png?raw=true title="JA Initiation Locations" />
+    <img src=output/JAInitiationLocations.png?raw=true title="JA Initiation Locations" width=60%/>
   </p>
 </a>
 
@@ -87,7 +87,7 @@ When looking at storms it can be interesting to explore how one strike is relate
 For this research we looked at several case studies over a roughly 1 degree by 1 degree box in Utah. This is what one of the 24 hour case-study periods looks like:
 <a href=https://github.com/jsignell/lightning-tools/blob/master/04%20Daily.ipynb>
   <p align="center">
-    <img src=output/storm.png?raw=true title="Daily Max"/>
+    <img src=output/storm.png?raw=true title="Storm" width=60%/>
   </p>
 </a>
 
@@ -96,7 +96,7 @@ Given a strike at a particular location, what is the rate of occurrence of strik
 
 <a href=https://github.com/jsignell/lightning-tools/blob/master/13%20Conditional%20rate%20of%20occurrence.ipynb>
   <p align="center">
-    <img src=output/likelihood.png?raw=true title="Conditional Rate of Occurrence"/>
+    <img src=output/likelihood.png?raw=true title="Conditional Rate of Occurrence" width=60%/>
   </p>
 </a>
 
@@ -118,7 +118,7 @@ We setup a model for several case studies and found that the lightning strikes p
 
 <a href=https://github.com/jsignell/lightning-tools/blob/master/14%Likelihood.ipynb>
   <p align="center">
-    <img src=output/poisson_example.png?raw=true title="Example of poisson output"/>
+    <img src=output/poisson_example.png?raw=true title="Example of poisson output" width=60%/>
   </p>
 </a>
 
