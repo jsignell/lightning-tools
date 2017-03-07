@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.png">
+
+    <title>Julia Signell</title>
+
+    <!-- Bootstrap core CSS -->
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+     integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  </head>
+
+  <body style="padding-top: 50px">
+      <div class='row'>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Julia Signell</a>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="https://github.com/jsignell">Github</a></li>
+            <li><a href="https://www.linkedin.com/in/julia-signell-8a948a88">LinkedIn</a></li>
+          </ul>
+          </div>
+        </div><!--/.navbar-collapse -->
+    </nav>
+  </div>
+    <div class='content'>
+  <div class='container'>
+    <div class='row'>
+    </br></br>
+
+<h1>
+<a id="ightning-tools" class="anchor" href="#lightning-tools" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Lightning Tools</h1>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+
+<p>The purpose of this project is to explore methods of conducting geospatial analyses of ungridded lightning data. In the course of this research, a more generalized module was developed. This work depends heavily on that module (see <a href="https://github.com/jsignell/point-process">pointprocess module</a> for more details).</p>
+
+<p>This research was largely conducted in Python with some 2D spatial tracking done in R. All of the analysis was conducted in Jupyter Notebooks to ease reproducibility and reuse. This project focuses on the American Southwest but examples are provided of how a different geographic region could be used.</p>
+
+<p><strong>Note</strong>: clicking on any  of the images below will bring you to the notebook that was used to generate the image.</p>
+
+<h2>
+<a id="presentations" class="anchor" href="#presentations" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Presentations</h2>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+
+<p>This research has been presented at:</p>
+
+<ul>
+<li>
+<p>The American Geophysical Union (AGU) fall meeting</p>
+
+<ul>
+<li><a href="output/poster.pdf">Poster</a></li>
+</ul>
+</li>
+<li>
+<p>The Scientific Python Conference (SciPy)</p>
+
+<ul>
+<li><a href="https://github.com/jsignell/lightning-tools/blob/master/Lightning%20Talk.ipynb">Slides</a></li>
+<li><a href="https://youtu.be/g15QeR5-Xkk?t=26m27s">Video</a></li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="data" class="anchor" href="#data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Data</h2>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+
+<p>Lightning data was provided by the National Lightning Detection Network (NLDN):</p>
+
+<blockquote>
+<p>"The National Lightning Detection Network, NLDN, consists of over 100 remote, ground-based sensing stations located across the United States that instantaneously detect the electromagnetic signals given off when lightning strikes the earth's surface. These remote sensors send the raw data via a satellite-based communications network to the Network Control Center operated by Vaisala Inc. in Tucson, Arizona. Within seconds of a lightning strike, the NCC's central analyzers process information on the location, time, polarity, and communicated to users across the country." (<em><a href="http://gcmd.nasa.gov/records/GCMD_NLDN.html">NASA</a></em>)</p>
+</blockquote>
+
+<h4>
+<a id="transformation" class="anchor" href="#transformation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Transformation</h4>
+
+<p>To facilitate data-use we reformatted the data into NetCDF files and served these files on an internal server using a THREDDS OpenDAP portal.</p>
+
+<h4>
+<a id="reading" class="anchor" href="#reading" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Reading</h4>
+
+<p>Once the data are in NetCDF, it is straightforward to read the data using the xarray package.
+<a href="https://github.com/jsignell/lightning-tools/blob/master/00%20Read%20Data.ipynb">
+  <p align="center">
+    <img src="output/US_1993.png?raw=true" title="US 1993 Flash Count" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h4>
+<a id="subsetting" class="anchor" href="#subsetting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Subsetting</h4>
+
+<p>For our purposes, we have chosen several research sites and pulled the data out for these sites. However, we have also provided methods for subsetting different geographic regions as in this case looking at Cape Cod:
+<a href="https://github.com/jsignell/lightning-tools/blob/master/01%20Un-subsetted.ipynb">
+  <p align="center">
+    <img src="output/CapeCod.png?raw=true" title="Cape Cod" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h2>
+<a id="climatology" class="anchor" href="#climatology" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Climatology</h2>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+
+<h4>
+<a id="flash-density" class="anchor" href="#flash-density" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Flash Density</h4>
+
+<p>One of the most fundamental climatological analyses of lightning is the flash density - the number of lightning strikes per unit area per unit time.
+<a href="https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#flash-density">
+  <p align="center">
+    <img src="output/AnnualMeanFD.png?raw=true" title="Flash Density" width="60%/" style="max-width:100%;">
+  </p>
+<br>
+</a></p>
+
+<h4>
+<a id="diurnal-cycle" class="anchor" href="#diurnal-cycle" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Diurnal Cycle</h4>
+
+<p>Another interesting aspect of lightning is the time of day at which it occurs.
+We can explore the seasonal dependence in the diurnal cycle of lightning using a plot with polar coordinates where the top represents midnight and the bottom represents noon. Months are indicated by color.
+<a href="https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#diurnal-cycle">
+  <p align="center">
+    <img src="output/DiurnalCycle.png?raw=true" title="Diurnal Cycle" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<p>To examine diurnal patterns in space, we map the hour of peak flash count. This shows the topographic dependence of the timing of lightning.
+<a href="https://github.com/jsignell/lightning-tools/blob/master/02%20Climatology.ipynb#peak-time">
+  <p align="center">
+    <img src="output/JAPeakHour.png?raw=true" title="Hour of Peak" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h4>
+<a id="initiation" class="anchor" href="#initiation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Initiation</h4>
+
+<p>When looking at storms it can be interesting to explore how one strike is related to another. As a first pass, we mapped the locations of strikes in July and August of one year and colored them by the number of strikes that would occur in the proceeding hour.
+<a href="https://github.com/jsignell/lightning-tools/blob/master/03%20Initiation.ipynb">
+  <p align="center">
+    <img src="output/JAInitiationLocations.png?raw=true" title="JA Initiation Locations" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h2>
+<a id="storm-level-analyses" class="anchor" href="#storm-level-analyses" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Storm level analyses</h2>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+
+<p>For this research we looked at several case studies over a roughly 1 degree by 1 degree box in Utah. This is what one of the 24 hour case-study periods looks like:
+<a href="https://github.com/jsignell/lightning-tools/blob/master/04%20Daily.ipynb">
+  <p align="center">
+    <img src="output/storm.png?raw=true" title="Storm" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h4>
+<a id="conditional-rate-of-occurrence" class="anchor" href="#conditional-rate-of-occurrence" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conditional Rate of Occurrence</h4>
+
+<p>Given a strike at a particular location, what is the rate of occurrence of strikes within 20km in a 2 minute window surrounding the time of strike?</p>
+
+<p><a href="https://github.com/jsignell/lightning-tools/blob/master/13%20Conditional%20rate%20of%20occurrence.ipynb">
+  <p align="center">
+    <img src="output/likelihood.png?raw=true" title="Conditional Rate of Occurrence" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h4>
+<a id="tracking" class="anchor" href="#tracking" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Tracking</h4>
+
+<p>We can use an object based method to track features using the r package SpatialVx and compare how radar based tracking compares to lightning tracking by loading in output from TITAN for the same storms:
+<a href="http://nbviewer.jupyter.org/github/jsignell/lightning-tools/blob/master/07%20TITAN%20radar%20and%20SpatialVx%20lightning%20comparison.ipynb">
+  <p align="center">
+    <img src="output/radar_tracked.png?raw=true" title="Radar Tracked" width="49%/" style="max-width:100%;">
+    <img src="output/lightning_tracked.png?raw=true" title="Lightning Tracked" width="49%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<h4>
+<a id="point-process-modeling" class="anchor" href="#point-process-modeling" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Point Process Modeling</h4>
+
+<p>The most common point process model is the Poisson process. Lightning strikes constitute a space-time Poisson process if the number of strikes in disjoint time and space intervals are independent and have a Poisson distribution. This independent increment assumption does not hold, because lightning strikes are strongly “clustered”.</p>
+
+<p>Our models build on Cox process models, which are conditional Poisson models in that the rate of occurrence is not a deterministic function of space and time, but a random process.</p>
+
+<p>We setup a model for several case studies and found that the lightning strikes predicted by radar reflectivity agreed reasonably well with observed strikes.</p>
+
+<p><a href="https://github.com/jsignell/lightning-tools/blob/master/14%Likelihood.ipynb">
+  <p align="center">
+    <img src="output/poisson_example.png?raw=true" title="Example of poisson output" width="60%/" style="max-width:100%;">
+  </p>
+</a></p>
+
+<p><a href="#">Top</a> | <a href="#presentations">Presentations</a> | <a href="#data">Data</a> | <a href="#climatology">Climatology</a> | <a href="#storm-level-analyses">Storms</a></p>
+</div>
+</div>
+</div>
+</body>
+</html>
