@@ -13,7 +13,7 @@ This research was largely conducted in Python with some 2D spatial tracking done
 
 This research has been presented at:
   - The American Geophysical Union (AGU) fall meeting
-    - [Poster](output/poster.pdf)
+    - [Poster](output/AGU_Poster.pdf)
 
 
   - The Scientific Python Conference (SciPy)
